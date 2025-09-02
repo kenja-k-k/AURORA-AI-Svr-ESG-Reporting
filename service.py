@@ -1,9 +1,37 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File, Request
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import Request
+from fastapi.responses import StreamingResponse
 import asyncio
-import os
+from pydantic import BaseModel
 import pandas as pd
+import os
+import base64
+from io import BytesIO
+from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime, timezone, timedelta
 from typing import Literal
+
+#Refactor from modules
+from insights import get_percent_changes
+
+app = FastAPI(title="ESG Reporting Service")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+
+
+
+#Initialize the csv as nothing___________
+data = pd.DataFrame()
+file_path = None
+file_name = None
+#___________________________
 
 
 # Expected format for requests___________________________
@@ -44,7 +72,7 @@ async def upload_csv(file: UploadFile = File(...)):
     with open(file_path, "wb") as f:
         f.write(await file.read())
 
-    data = set_csv() #data is now the uploaded csv
+    set_csv() #data is now the uploaded csv
     """
     if "anomaly_flag" not in data.columns: #check if the anomaly_flag field even exists
         data["anomaly_flag"] = False
@@ -64,7 +92,7 @@ def facility_names():
 
 #Train the model, IF needed___________________
 @app.get("/train_model")
-async def train_model(lr:float = 0.01, depth:int = 5, verbosity: -1|1|0 = -1): #verbose is really nor needed, but use it if you dev
+async def train_model(lr:float = 0.01, depth:int = 5, verbosity= -1): #verbose is really nor needed, but use it if you dev
     parameters = {
         "objective"     : "regression",
         "metric"        : "rmse",
@@ -75,10 +103,26 @@ async def train_model(lr:float = 0.01, depth:int = 5, verbosity: -1|1|0 = -1): #
     }
 
 
-"""
+#ESG insights for the data. This can use a number of metrics______________________
 @app.get("/get_esg")
-async def get_esg(facility_name: str):
+async def get_esg(facility_name: str, report_type: Literal["Percent changes", 
+                                                           "Relative performance to global"],
+
+                                                   variable: Literal["co2_emitted_tonnes", 
+                                                                     "co2_captured_tonnes", 
+                                                                     "capture_efficiency_percent"]):
+
     global data, file_path
-"""
+
+    match report_type:
+          case "Percent changes":
+              return get_percent_changes(facility_name, data, variable)
+
+          case "Relative performance to global":
+              return get_global_performance(facility_name, data, variable)   
+
+                            
+    
+
     
 
