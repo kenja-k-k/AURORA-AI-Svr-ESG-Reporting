@@ -102,15 +102,21 @@ async def train_model(lr:float = 0.01, depth:int = 5, verbosity= -1): #verbose i
         "verbosity"     : verbosity
     }
 
-
+ 
 #ESG insights for the data. This can use a number of metrics______________________
 @app.get("/get_esg")
-async def get_esg(facility_name: str, report_type: Literal["Percent changes", 
-                                                           "Relative performance to global"],
+async def get_esg(facility_name: Literal["Alpha CCS Plant", 
+                                         "Beta Capture Hub", 
+                                         "Delta Storage", 
+                                         "Epsilon Capture"],
 
-                                                   variable: Literal["co2_emitted_tonnes", 
-                                                                     "co2_captured_tonnes", 
-                                                                     "capture_efficiency_percent"]):
+                  report_type: Literal["Percent changes", 
+                                       "Relative performance to global"],
+
+                  variable: Literal["co2_emitted_tonnes", 
+                                    "co2_captured_tonnes", 
+                                    "capture_efficiency_percent"]
+                  ):
 
     global data, file_path
 
