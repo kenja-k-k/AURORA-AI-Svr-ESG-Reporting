@@ -1,5 +1,6 @@
 import pandas as pd
 from typing import Literal
+import numpy as np
 
 #To get facility names___________________
 def facility_names(data):
@@ -9,6 +10,25 @@ def facility_names(data):
     else:
         names = list(set(data["facility_name"]))
         return names
+
+#For trends over a period of time
+def trends(facility_name: str, data, variable: str):
+    # Filter rows for facility and column
+    filtered = data[data["facility_name"] == facility_name].dropna(subset=[variable])
+
+    if filtered.empty:
+        return "No data to get trends."
+
+    # Use last 5 raw values
+    last_5 = filtered[variable].tail(5)
+
+    # Compare first and last
+    if last_5.iloc[-1] > last_5.iloc[0]:
+        return f"{variable} Rising"
+    elif last_5.iloc[-1] < last_5.iloc[0]:
+        return f"{variable} Falling!"
+    else:
+        return f"{variable} Stable"
 
 
 #For relative percent changes__________

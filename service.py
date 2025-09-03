@@ -12,7 +12,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Literal
 
 #Refactor from modules
-from insights import get_percent_changes
+from insights import get_percent_changes, trends, get_global_performance
 
 app = FastAPI(title="ESG Reporting Service")
 app.add_middleware(
@@ -128,7 +128,25 @@ async def get_esg(facility_name: Literal["Alpha CCS Plant",
               return get_global_performance(facility_name, data, variable)   
 
                             
-    
+#Get trends for the data. This can use a number of metrics______________________
+@app.get("/get_trend")
+async def get_trends(facility_name: Literal["Alpha CCS Plant", 
+                                          "Beta Capture Hub", 
+                                          "Delta Storage", 
+                                          "Epsilon Capture"],
 
+                   variable: Literal["co2_emitted_tonnes", 
+                                     "co2_captured_tonnes", 
+                                     "capture_efficiency_percent"]
+                  ):
+
+    global data, file_path
     
+    report_type ="Percent changes"
+    
+    return trends(facility_name, data, variable)
+
+           
+
+
 
