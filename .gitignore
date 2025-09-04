@@ -3,3 +3,8 @@ experimental
 __pycache__
 .idea
 co2_venv
+requirements.txt
+token.txt
+config.py
+keys.env
+backup

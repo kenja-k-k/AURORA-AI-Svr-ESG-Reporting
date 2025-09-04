@@ -1,0 +1,27 @@
+Guidelines for CO2 Capture and Storage
+
+1. Facility Monitoring
+- Facilities must continuously monitor both emitted and captured CO₂.
+- Capture efficiency should remain above 85% for compliance.
+- Any anomalies should be flagged for immediate review.
+
+2. Storage Site Requirements
+- Preferred storage sites are deep saline aquifers or depleted oil & gas fields.
+- Storage integrity must be maintained above 99% to ensure long-term containment.
+- Seasonal variations (winter, summer) can affect efficiency and must be accounted for.
+
+3. Reporting Standards
+- Facilities should report monthly values for emissions, captured CO₂, and stored CO₂.
+- Capture efficiency is calculated as:
+    (CO₂ Captured ÷ CO₂ Emitted) × 100
+- Storage integrity reflects the percentage of CO₂ successfully stored without leakage.
+
+4. Safety and Anomaly Management
+- If anomalies are detected, operations should be reviewed within 7 days.
+- Notes should document the cause and corrective action taken.
+- Persistent anomalies may require suspension of injection activities.
+
+5. Best Practices
+- Optimize capture systems during peak emission seasons.
+- Regularly maintain compressors and storage site infrastructure.
+- Transparency in reporting improves trust and regulatory compliance.

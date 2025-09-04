@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import FastAPI, HTTPException, UploadFile, File, Query
 from fastapi import Request
 from fastapi.responses import StreamingResponse
 import asyncio
@@ -13,25 +13,12 @@ from typing import Literal
 
 #Refactor from modules
 from insights import get_percent_changes, trends, get_global_performance
-
-app = FastAPI(title="ESG Reporting Service")
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"], 
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+from rag import RAGPipeline
 
 
+app = FastAPI()
+rag = RAGPipeline()
 
-
-
-#Initialize the csv as nothing___________
-data = pd.DataFrame()
-file_path = None
-file_name = None
-#___________________________
 
 
 # Expected format for requests___________________________
@@ -48,7 +35,7 @@ class GlobalInput(BaseModel):
     capture_efficiency_percent  : float | None = None
     storage_integrity_percent   : float | None = None
     #anomaly_flag                :
-#___________________________
+
 
 #To set a csv as data___________________
 def set_csv():
@@ -146,7 +133,25 @@ async def get_trends(facility_name: Literal["Alpha CCS Plant",
     
     return trends(facility_name, data, variable)
 
-           
 
 
+rag = RAGPipeline(
+    embedding_model_name="sentence-transformers/all-MiniLM-L6-v2",
+    llm_model_name="microsoft/phi-3-mini-128k-instruct",
+    db_path="./chroma_db",
+    device="cpu"  # change to "cuda" if you have GPU
+)
 
+
+@app.get("/get_text_query")
+def get_text_query(query: str = Query(..., description="User question")):
+   
+    if not query.strip():
+        raise HTTPException(status_code=400, detail="Query cannot be empty")
+
+    try:
+        answer = rag.answer_question(query)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating answer: {str(e)}")
+
+    return {"query": query, "answer": answer}
