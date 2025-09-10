@@ -20,6 +20,15 @@ app = FastAPI()
 rag = RAGPipeline()
 
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 
 # Expected format for requests___________________________
 class GlobalInput(BaseModel):
@@ -36,6 +45,20 @@ class GlobalInput(BaseModel):
     storage_integrity_percent   : float | None = None
     #anomaly_flag                :
 
+
+data = pd.DataFrame()
+csv_path = None
+
+
+@app.post("/upload_csv/")
+async def upload_csv(file: UploadFile = File(...)):
+    global csv_path, data
+    csv_path = f"./dataset_file.csv"  # save file to local dir and make sure that only obe file is there at a time
+    with open(csv_path, "wb") as f:
+        f.write(await file.read())
+
+    data = pd.read_csv(csv_path)  # data is now the uploaded csv
+    return {"status": "success", "message": f"Your csv has been uploaded, and saved to {csv_path}"}
 
 #To set a csv as data___________________
 def set_csv():
@@ -75,6 +98,7 @@ def facility_names():
     else:
         names = list(set(data["facility_names"]))
         return names 
+
 
 
 #Train the model, IF needed___________________
