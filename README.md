@@ -56,6 +56,7 @@ This service extends the AURORA platform by focusing on **ESG goal alignment and
 ## 3. PoC Features and Requirements
 
 The **Proof of Concept (PoC)** demonstrates three primary features using simulated IoT data, as specified in the *ESG Reporting Specification*:
+[PLACEHOLDER: All features to be confirmed and finalized.]
 
 | Feature ID | Feature Name              | Description                                                                 |
 |------------|---------------------------|-----------------------------------------------------------------------------|
