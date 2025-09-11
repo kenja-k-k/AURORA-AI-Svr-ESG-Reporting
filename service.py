@@ -12,12 +12,12 @@ from datetime import datetime, timezone, timedelta
 from typing import Literal
 
 #Refactor from modules
-from insights import get_percent_changes, trends, get_global_performance
-from rag import RAGPipeline
+from insights import get_percent_changes, trends, global_bench, annual_stats
+#from rag import RAGPipeline
 
 
 app = FastAPI()
-rag = RAGPipeline()
+#rag = RAGPipeline()
 
 
 app.add_middleware(
@@ -50,25 +50,29 @@ data = pd.DataFrame()
 csv_path = None
 
 
-@app.post("/upload_csv/")
-async def upload_csv(file: UploadFile = File(...)):
-    global csv_path, data
-    csv_path = f"./dataset_file.csv"  # save file to local dir and make sure that only obe file is there at a time
-    with open(csv_path, "wb") as f:
-        f.write(await file.read())
-
-    data = pd.read_csv(csv_path)  # data is now the uploaded csv
-    return {"status": "success", "message": f"Your csv has been uploaded, and saved to {csv_path}"}
-
 #To set a csv as data___________________
 def set_csv():
     global data, file_name, file_path
 
-    if os.path.exists(file_path):
-        data = pd.read_csv(file_path)
-        return f"{file_name} set as source data."
-    else:
-        return f"No file labelled {file_name} found on the server. Please check the filename."        
+    if file_path is None or not os.path.exists(file_path):
+        raise FileNotFoundError(f"No file named {file_name}.csv found on the server. Please check the filename.")
+    
+    data = pd.read_csv(file_path)
+    return f"{file_name} set as source data."        
+
+#Use an existing csv as data___________________
+@app.post("/use_csv")
+def use_csv(name: str):
+    global file_name, file_path
+
+    file_name = name
+    file_path = f"./{file_name}.csv"
+
+    try:
+        msg = set_csv()
+        return {"status": "success", "message": msg}
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 #To upload the data from frontend AND use it as source data
 @app.post("/upload_csv")
@@ -157,6 +161,14 @@ async def get_trends(facility_name: Literal["Alpha CCS Plant",
     
     return trends(facility_name, data, variable)
 
+#Get annual metrics for a facility
+@app.get("/get_annual_stats")
+def get_annual_stats(facility_name:str):
+    global data, file_path
+
+    return annual_stats(data, facility_name)
+
+"""
 
 
 rag = RAGPipeline(
@@ -179,3 +191,4 @@ def get_text_query(query: str = Query(..., description="User question")):
         raise HTTPException(status_code=500, detail=f"Error generating answer: {str(e)}")
 
     return {"query": query, "answer": answer}
+"""

@@ -48,7 +48,74 @@ def get_percent_changes(facility_name: str, data, variable: str):
 
     return f"The relative changes for {variable}, for the facility {facility_name} are as follows", changes
 
-#For comparision with global 
-def get_global_performance(data, variable: str):
+#For annual statistics
+def annual_stats(data: pd.DataFrame, facility_name: str, fallback: bool = True) -> dict:
+    
+    if data.empty: 
+        raise ValueError("The dataset is empty. Please set the CSV data first.")
+    
+    if facility_name not in data["facility_name"].unique():
+        raise ValueError(f"Facility '{facility_name}' not found in the dataset.")
+    
+    # We will not include outliers, therefore dont need anomalies
+    data = data[(data["facility_name"] == facility_name) & (data["anomaly_flag"] == False)].copy()
+    
+    # Pandas really needs its own datetime dataframe
+    data["date"] = pd.to_datetime(data["date"], format="%d/%m/%Y", dayfirst=True, errors="coerce")
+    data["year"] = data["date"].dt.year
 
-        return None                   
+    current_year = data["year"].max() #Check the latest year, this will not work without datetime format
+    target_year = current_year - 1    #Add the last year as target 
+
+    filtered = data[data["year"] == target_year]
+
+    # back to current year if previous year has no data
+    if fallback and filtered.empty:
+        filtered = data[data["year"] == current_year]
+
+    stats = {
+        "Total annual emissions": f"{filtered['co2_emitted_tonnes'].sum()} tonnes",
+        "Mean annual emissions": f"{filtered['co2_emitted_tonnes'].mean()} tonnes",
+        "Mean efficiency": f"{filtered['capture_efficiency_percent'].mean()} %",
+        "Mean storage integrity": f"{filtered['storage_integrity_percent'].mean()} %",
+        "Minimum efficiency": f"{filtered['capture_efficiency_percent'].min()} %",
+        "Minimum storage integrity": f"{filtered['storage_integrity_percent'].min()} %"
+    }
+
+    return stats
+
+
+
+#Add a season column in a df
+def add_season(data: pd.DataFrame) -> pd.DataFrame:
+    data = data.copy()
+    # Ensure 'date' is datetime
+    data["date"] = pd.to_datetime(data["date"], format="%d/%m/%Y", dayfirst=True, errors="coerce")
+    data["month"] = data["date"].dt.month
+
+    # Map months to seasons
+    def month_to_season(month: int) -> str:
+        if month in [12, 1, 2]:
+            return "Winter"
+        elif month in [3, 4]:
+            return "Spring"
+        elif month in [5, 6, 7, 8, 9]:
+            return "Summer"
+        elif month in [10, 11]:
+            return "Autumn"
+        else:
+            return None  # in case of missing or invalid dates
+
+    data["season"] = data["month"].apply(month_to_season)
+    return data
+
+#For comparision with global 
+def global_bench(data, bench, facility_name: str):
+    filtered = data[data["facility_name"] == "facility_name"]
+    filtered = add_season(filtered)
+    fc_type = filtered["storage_site_type"].drop_duplicates().tolist()
+    region = filtered["region"].drop_duplicates().tolist()
+    benchmarks = bench[bench["storage_site_type"].isin(fc_type) & bench["region"].isin(region)]
+    
+    #Will compare the entries to the benchmark and return facilities that underperformed
+    return filtered, benchmarks     
