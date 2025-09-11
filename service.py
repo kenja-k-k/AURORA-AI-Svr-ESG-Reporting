@@ -1,13 +1,25 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File, Request
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException, UploadFile, File, Query
+from fastapi import Request
+from fastapi.responses import StreamingResponse
 import asyncio
-import os
+from pydantic import BaseModel
 import pandas as pd
+import os
+import base64
+from io import BytesIO
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime, timezone, timedelta
+from typing import Literal
 
+#Refactor from modules
+from insights import get_percent_changes, trends, get_global_performance
+from rag import RAGPipeline
 
 
 app = FastAPI()
+rag = RAGPipeline()
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,6 +27,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 
 # Expected format for requests___________________________
@@ -31,7 +44,7 @@ class GlobalInput(BaseModel):
     capture_efficiency_percent  : float | None = None
     storage_integrity_percent   : float | None = None
     #anomaly_flag                :
-#___________________________
+
 
 data = pd.DataFrame()
 csv_path = None
@@ -48,21 +61,49 @@ async def upload_csv(file: UploadFile = File(...)):
     return {"status": "success", "message": f"Your csv has been uploaded, and saved to {csv_path}"}
 
 #To set a csv as data___________________
-def set_csv(csv_name: str):
-    global data, file_path
-    file_path = fr".\{csv_name}"
+def set_csv():
+    global data, file_name, file_path
 
-    if os.path.exists:
-        global data
+    if os.path.exists(file_path):
         data = pd.read_csv(file_path)
-        return f"{csv_name} set as source data."
+        return f"{file_name} set as source data."
     else:
-        return f"No file labelled {csv_name} found on the server. Please check the filename."
-    
+        return f"No file labelled {file_name} found on the server. Please check the filename."        
+
+#To upload the data from frontend AND use it as source data
+@app.post("/upload_csv")
+async def upload_csv(file: UploadFile = File(...)):
+    global file_name, file_path, data
+     
+    #timestamp = datetime.now().astimezone().strftime("%Y-%m-%d_%H-%M-%S_%Z")
+    #csv_path = f"./{timestamp}_{file.filename}" #save file to local dir
+    file_name = file.filename
+    file_path = f"./{file.filename}"
+    with open(file_path, "wb") as f:
+        f.write(await file.read())
+
+    set_csv() #data is now the uploaded csv
+    """
+    if "anomaly_flag" not in data.columns: #check if the anomaly_flag field even exists
+        data["anomaly_flag"] = False
+        data.to_csv(csv_path, index=False)
+    """
+    return {"status": "success", "message": f"Your csv has been uploaded, and saved to {file_path}"}
+
+#Get the facility names
+def facility_names():
+    global data, names 
+    if data.empty:
+        return "Set a csv source data first"
+    else:
+        names = list(set(data["facility_names"]))
+        return names 
+
+
 
 #Train the model, IF needed___________________
 @app.get("/train_model")
-async def train_model(lr:float = 0.01, depth:int = 5, verbosity: -1|1|0 = -1): #verbose is really nor needed, but use it if you dev
+async def train_model(lr:float = 0.01, depth:int = 5, verbosity= -1): #verbose is really nor needed, but use it if you dev
     parameters = {
         "objective"     : "regression",
         "metric"        : "rmse",
@@ -72,9 +113,69 @@ async def train_model(lr:float = 0.01, depth:int = 5, verbosity: -1|1|0 = -1): #
         "verbosity"     : verbosity
     }
 
+ 
+#ESG insights for the data. This can use a number of metrics______________________
 @app.get("/get_esg")
-async def get_esg(facility_name: str):
+async def get_esg(facility_name: Literal["Alpha CCS Plant", 
+                                         "Beta Capture Hub", 
+                                         "Delta Storage", 
+                                         "Epsilon Capture"],
+
+                  report_type: Literal["Percent changes", 
+                                       "Relative performance to global"],
+
+                  variable: Literal["co2_emitted_tonnes", 
+                                    "co2_captured_tonnes", 
+                                    "capture_efficiency_percent"]
+                  ):
+
     global data, file_path
 
-    
+    match report_type:
+          case "Percent changes":
+              return get_percent_changes(facility_name, data, variable)
 
+          case "Relative performance to global":
+              return get_global_performance(facility_name, data, variable)   
+
+                            
+#Get trends for the data. This can use a number of metrics______________________
+@app.get("/get_trend")
+async def get_trends(facility_name: Literal["Alpha CCS Plant", 
+                                          "Beta Capture Hub", 
+                                          "Delta Storage", 
+                                          "Epsilon Capture"],
+
+                   variable: Literal["co2_emitted_tonnes", 
+                                     "co2_captured_tonnes", 
+                                     "capture_efficiency_percent"]
+                  ):
+
+    global data, file_path
+    
+    report_type ="Percent changes"
+    
+    return trends(facility_name, data, variable)
+
+
+
+rag = RAGPipeline(
+    embedding_model_name="sentence-transformers/all-MiniLM-L6-v2",
+    llm_model_name="microsoft/phi-3-mini-128k-instruct",
+    db_path="./chroma_db",
+    device="cpu"  # change to "cuda" if you have GPU
+)
+
+
+@app.get("/get_text_query")
+def get_text_query(query: str = Query(..., description="User question")):
+   
+    if not query.strip():
+        raise HTTPException(status_code=400, detail="Query cannot be empty")
+
+    try:
+        answer = rag.answer_question(query)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating answer: {str(e)}")
+
+    return {"query": query, "answer": answer}
