@@ -77,7 +77,7 @@ Core components include analytics modules, LLM/RAG pipelines, sample datasets, a
 [PLACEHOLDER: Structure may change as development continues.]
 
 | Path / File                | Description                                                                                       | Related Features |
-|-----------------------------|----------------------------------------
+|-----------------------------|---------------------------------------------------------------------------------------------------|------------------|
 | **`.gitignore`**            | Rules to exclude Python/IDE/cache files from git.                                                 | Housekeeping |
 | **`data.csv`**              | Example dataset with CCS facility performance data.                                               | Demo |
 | **`dataset_file.csv`**      | Sample dataset for ESG metrics analysis.                                                          | Demo |
