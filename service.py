@@ -175,7 +175,7 @@ def get_annual_stats(facility_name:str):
 
 #Get stats for a given period______________
 @app.get("/get_stats_by_range")
-def get_stats_by_range(
+async def get_stats_by_range(
                         facility_name: str,
                         start_date: Optional[str] = Query(None, description="Optional, but must be in dd/mm/yyyy"),
                         end_date: Optional[str] = Query(None, description="Optional, but must be in dd/mm/yyyy"),
