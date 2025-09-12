@@ -10,9 +10,12 @@ from io import BytesIO
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timezone, timedelta
 from typing import Literal, Optional
+import joblib
+
 
 #Refactor from modules
 from insights import get_percent_changes, trends, global_bench, annual_stats, stats_by_range
+from models import LGBM_regressor
 #from rag import RAGPipeline
 
 
@@ -106,16 +109,32 @@ def facility_names():
 
 
 #Train the model, IF needed___________________
-@app.get("/train_model")
-async def train_model(lr:float = 0.01, depth:int = 5, verbosity= -1): #verbose is really nor needed, but use it if you dev
-    parameters = {
-        "objective"     : "regression",
-        "metric"        : "rmse",
-        "learning_rate" : lr,
-        "boosting_type" : "gbdt",
-        "num_leaves"    : (2**depth)-1,
-        "verbosity"     : verbosity
-    }
+@app.get("/train_lgbm")
+async def train_lgbm(facility_name:str, 
+                     lr:float = Query(0.05, description="The learning rate. Default value is 0.05."), 
+                     depth:int = Query(5, description="Depth for the tree. Controls the number of leaves. Default value is 5."), 
+                     verbosity = Query(-1, description="Use 1 if you need verbose. Default is -1, no verbose.")
+                     ):#verbose is really nor needed, but use it if you dev
+
+          global data
+
+          try:
+            model, encoders = LGBM_regressor(facility_name, data, lr, depth)
+            if not os.path.exists("saved_models"):
+                os.makedirs("saved_models")
+            file_path =  f"saved_models/{facility_name}_lgbm.pkl"
+            joblib.dump({"model": model, "encoders": encoders}, file_path)
+            
+            return f"LGBM model for {facility_name} trained, and saved on server at [{file_path}]"
+
+          except ValueError as e:
+                  raise HTTPException(status_code= 400, detail = "Bad request. Facility name might be invaid")    
+          except ValueError as e:
+                  raise HTTPException(status_code= 500, detail = f"Unexpected error: {str(e)}")    
+
+
+
+    
 
  
 #ESG insights for the data. This can use a number of metrics______________________

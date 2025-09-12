@@ -2,7 +2,9 @@ import lightgbm as lgb
 from sklearn.preprocessing import LabelEncoder
 import pandas as pd
 
-def LGBM_regressor(facility_name: str, data: pd.DataFrame):
+def LGBM_regressor(facility_name: str, data: pd.DataFrame, 
+                  lr: float = 0.05, depth:int = 5
+                  ):
     
     filtered = data[data["facility_name"] == facility_name].dropna(
         subset=["co2_emitted_tonnes", "region", "storage_site_type", "season", "co2_captured_tonnes"]
@@ -30,8 +32,8 @@ def LGBM_regressor(facility_name: str, data: pd.DataFrame):
     params = {
         "objective": "regression",
         "metric": "rmse",
-        "learning_rate": 0.05,
-        "num_leaves": 31,
+        "learning_rate": lr,
+        "num_leaves": (2**depth)-1,
         "verbose": -1
     }
 
