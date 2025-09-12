@@ -84,7 +84,54 @@ def annual_stats(data: pd.DataFrame, facility_name: str, fallback: bool = True) 
 
     return stats
 
+#Get stats for a give range of dates.
+def stats_by_range(data: pd.DataFrame, facility_name: str, start_date: str, end_date: str):
+    """
+    Dates for this function must be in dd/mm/yyyy.
+    Caution: Pandas dataframe automatically assigns a date pattern, 
+    so make sure to align the source formating and this function's format.
+    This has caused some issues before.
+    """
 
+    if data.empty: 
+        raise ValueError("No data found. Set the source CSV data before anything.")
+
+    if facility_name not in data["facility_name"].unique():
+        raise ValueError(f"Facility '{facility_name}' not found in the source csv.")
+
+    filtered = data[(data["facility_name"] == facility_name) & (data["anomaly_flag"] == False)].copy() #Dont want anomalies here, so
+
+    
+    filtered["date"] = pd.to_datetime(filtered["date"], format="%d/%m/%Y", dayfirst=True, errors="coerce") # Making sure that the dates col is properly formatted
+
+    # Ensure valid start and end date
+    """
+    Using coerce for error for now, because this is poc.
+    Might use different error becavior later on in production
+    """
+    start_date = pd.to_datetime(start_date, format="%d/%m/%Y", dayfirst=True, errors="coerce")  
+    end_date = pd.to_datetime(end_date, format="%d/%m/%Y", dayfirst=True, errors="coerce")
+
+    if pd.isna(start_date) or pd.isna(end_date):
+        raise ValueError("Invalid start_date or end_date format or both. Use ther dd/mm/yyyy format.")
+
+    # Filter by date range
+    date_filtered = filtered[(filtered["date"] >= start_date) & (filtered["date"] <= end_date)]
+
+    if date_filtered.empty:
+        return {"message": f"No data available for {facility_name} between {start_date.date()} and {end_date.date()}"}
+
+    stats = {
+        "Date range": f"{start_date.date()} to {end_date.date()}",
+        "Total emissions": f"{date_filtered['co2_emitted_tonnes'].sum()} tonnes",
+        "Mean emissions": f"{date_filtered['co2_emitted_tonnes'].mean()} tonnes",
+        "Mean efficiency": f"{date_filtered['capture_efficiency_percent'].mean()} %",
+        "Mean storage integrity": f"{date_filtered['storage_integrity_percent'].mean()} %",
+        "Minimum efficiency": f"{date_filtered['capture_efficiency_percent'].min()} %",
+        "Minimum storage integrity": f"{date_filtered['storage_integrity_percent'].min()} %"
+    }
+
+    return f"The metrics for the {facility_name} facility are as below", stats 
 
 #Add a season column in a df
 def add_season(data: pd.DataFrame) -> pd.DataFrame:

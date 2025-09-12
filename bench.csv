@@ -1,0 +1,21 @@
+,date,region,storage_site_type,co2_emitted_tonnes,co2_captured_tonnes,co2_stored_tonnes,capture_efficiency_percent,storage_integrity_percent,anomaly_flag,notes,season
+0,,Texas,Saline Aquifer,13141.88,11668.06,11634.96,90.54,99.716,FALSE,,spring
+1,,Texas,Saline Aquifer,13141.88,11668.06,11634.96,85.21,99.716,FALSE,,summer
+2,,Texas,Saline Aquifer,13141.88,11668.06,11634.96,89.76,99.716,FALSE,,autumn
+3,,Texas,Saline Aquifer,13141.88,11668.06,11634.96,93.79,99.716,FALSE,,winter
+4,,Rogaland,Depleted Oil Field,16925.01,15514.57,15422.75,91.67,99.408,FALSE,,spring
+5,,Rogaland,Depleted Oil Field,16925.01,15514.57,15422.75,91.67,99.408,FALSE,,summer
+6,,Rogaland,Depleted Oil Field,16925.01,15514.57,15422.75,91.67,99.408,FALSE,,autumn
+7,,Rogaland,Depleted Oil Field,16925.01,15514.57,15422.75,91.67,99.408,FALSE,,winter
+8,,Hokkaido,Basalt Formation,14841.49,13169.31,13212.27,88.73,100.326,FALSE,,spring
+9,,Hokkaido,Basalt Formation,14841.49,13169.31,13212.27,88.73,100.326,FALSE,,summer
+10,,Hokkaido,Basalt Formation,14841.49,13169.31,13212.27,88.73,100.326,FALSE,,autumn
+11,,Hokkaido,Basalt Formation,14841.49,13169.31,13212.27,88.73,100.326,FALSE,,winter
+12,,Queensland,Saline Aquifer,14845.09,13495.01,13402.87,90.91,99.317,FALSE,,spring
+13,,Queensland,Saline Aquifer,14845.09,13495.01,13402.87,90.91,99.317,FALSE,,summer
+14,,Queensland,Saline Aquifer,14845.09,13495.01,13402.87,90.91,99.317,FALSE,,autumn
+15,,Queensland,Saline Aquifer,14845.09,13495.01,13402.87,90.91,99.317,FALSE,,winter
+16,,Aberdeenshire,Depleted Gas Field,11231.63,9820.54,9829.07,87.44,100.087,FALSE,,spring
+17,,Aberdeenshire,Depleted Gas Field,11231.63,9820.54,9829.07,87.44,100.087,FALSE,,summer
+18,,Aberdeenshire,Depleted Gas Field,11231.63,9820.54,9829.07,87.44,100.087,FALSE,,autumn
+19,,Aberdeenshire,Depleted Gas Field,11231.63,9820.54,9829.07,87.44,100.087,FALSE,,winter

@@ -8,5 +8,5 @@ requirements.txt
 token.txt
 config.py
 keys.env
-backup
+backups
 

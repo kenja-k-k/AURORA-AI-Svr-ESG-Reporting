@@ -9,10 +9,10 @@ import base64
 from io import BytesIO
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timezone, timedelta
-from typing import Literal
+from typing import Literal, Optional
 
 #Refactor from modules
-from insights import get_percent_changes, trends, global_bench, annual_stats
+from insights import get_percent_changes, trends, global_bench, annual_stats, stats_by_range
 #from rag import RAGPipeline
 
 
@@ -161,12 +161,34 @@ async def get_trends(facility_name: Literal["Alpha CCS Plant",
     
     return trends(facility_name, data, variable)
 
-#Get annual metrics for a facility
+
+#Get annual metrics for a facility_______________
+"""
+
 @app.get("/get_annual_stats")
 def get_annual_stats(facility_name:str):
     global data, file_path
 
     return annual_stats(data, facility_name)
+"""
+
+
+#Get stats for a given period______________
+@app.get("/get_stats_by_range")
+def get_stats_by_range(
+                        facility_name: str,
+                        start_date: Optional[str] = Query(None, description="Optional, but must be in dd/mm/yyyy"),
+                        end_date: Optional[str] = Query(None, description="Optional, but must be in dd/mm/yyyy"),
+                        annual: bool = True
+                      ):
+    global data, file_path
+
+    if annual or (not start_date and not end_date):
+        return annual_stats(data, facility_name) #Return this, if the annual flag is on
+    else:
+        return stats_by_range(data, facility_name, start_date, end_date)
+    
+
 
 """
 
