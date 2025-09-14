@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File, Query
+from fastapi import FastAPI, HTTPException, UploadFile, File, Query, Form
 from fastapi import Request
 from fastapi.responses import StreamingResponse
 import asyncio
@@ -15,11 +15,12 @@ import joblib
 
 #Refactor from modules
 from insights import get_percent_changes, trends, global_bench, annual_stats, stats_by_range
+from kenjaAI import get_esg_report
 from models import LGBM_regressor
 #from rag import RAGPipeline
 
 
-app = FastAPI()
+app = FastAPI(title="ESG Reporting")
 #rag = RAGPipeline()
 
 
@@ -54,28 +55,15 @@ csv_path = None
 
 
 #To set a csv as data___________________
-def set_csv():
-    global data, file_name, file_path
 
-    if file_path is None or not os.path.exists(file_path):
-        raise FileNotFoundError(f"No file named {file_name}.csv found on the server. Please check the filename.")
-    
-    data = pd.read_csv(file_path)
-    return f"{file_name} set as source data."        
+def use_csv():
+    global csv_path, data
+    csv_path = fr".\csv_dataset.csv"
+    if os.path.exists(csv_path):
+       data = pd.read_csv(csv_path)
+    else:
+       return {"error": "CSV not found on server. Please check the file name."}
 
-#Use an existing csv as data___________________
-@app.post("/use_csv")
-def use_csv(name: str):
-    global file_name, file_path
-
-    file_name = name
-    file_path = f"./{file_name}.csv"
-
-    try:
-        msg = set_csv()
-        return {"status": "success", "message": msg}
-    except FileNotFoundError as e:
-        raise HTTPException(status_code=404, detail=str(e))
 
 #To upload the data from frontend AND use it as source data
 @app.post("/upload_csv")
@@ -84,12 +72,10 @@ async def upload_csv(file: UploadFile = File(...)):
      
     #timestamp = datetime.now().astimezone().strftime("%Y-%m-%d_%H-%M-%S_%Z")
     #csv_path = f"./{timestamp}_{file.filename}" #save file to local dir
-    file_name = file.filename
+    file_name = "csv_dataset"
     file_path = f"./{file.filename}"
     with open(file_path, "wb") as f:
         f.write(await file.read())
-
-    set_csv() #data is now the uploaded csv
     """
     if "anomaly_flag" not in data.columns: #check if the anomaly_flag field even exists
         data["anomaly_flag"] = False
@@ -153,7 +139,7 @@ async def get_esg(facility_name: Literal["Alpha CCS Plant",
                   ):
 
     global data, file_path
-
+    use_csv()
     match report_type:
           case "Percent changes":
               return get_percent_changes(facility_name, data, variable)
@@ -193,20 +179,29 @@ def get_annual_stats(facility_name:str):
 
 
 #Get stats for a given period______________
-@app.get("/get_stats_by_range")
-async def get_stats_by_range(
+@app.get("/generate_esg_report")
+async def generate_esg_report(
                         facility_name: str,
                         start_date: Optional[str] = Query(None, description="Optional, but must be in dd/mm/yyyy"),
                         end_date: Optional[str] = Query(None, description="Optional, but must be in dd/mm/yyyy"),
                         annual: bool = True
                       ):
+    print("Generating esg report...")
+    use_csv()
     global data, file_path
-
+    stats_data = {}
     if annual or (not start_date and not end_date):
-        return annual_stats(data, facility_name) #Return this, if the annual flag is on
+        stats_data =  annual_stats(data, facility_name) #Return this, if the annual flag is on
     else:
-        return stats_by_range(data, facility_name, start_date, end_date)
+        stats_data = stats_by_range(data, facility_name, start_date, end_date)
+
+    esg_report = await get_esg_report(stats_data)
+    return {
+        "esg_report": esg_report["response"]["content"],
+        "stats_data": stats_data
+    }
     
+
 
 
 """

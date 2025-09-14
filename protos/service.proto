@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package esgReporting;
+
+message UploadCSVRequest {
+  bytes file_content = 1;
+}
+
+message UploadCSVResponse {
+  string status = 1;
+  string message = 2;
+}

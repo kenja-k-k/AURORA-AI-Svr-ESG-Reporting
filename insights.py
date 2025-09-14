@@ -74,12 +74,13 @@ def annual_stats(data: pd.DataFrame, facility_name: str, fallback: bool = True) 
         filtered = data[data["year"] == current_year]
 
     stats = {
-        "Total annual emissions": f"{filtered['co2_emitted_tonnes'].sum()} tonnes",
-        "Mean annual emissions": f"{filtered['co2_emitted_tonnes'].mean()} tonnes",
-        "Mean efficiency": f"{filtered['capture_efficiency_percent'].mean()} %",
-        "Mean storage integrity": f"{filtered['storage_integrity_percent'].mean()} %",
-        "Minimum efficiency": f"{filtered['capture_efficiency_percent'].min()} %",
-        "Minimum storage integrity": f"{filtered['storage_integrity_percent'].min()} %"
+        "facility_name": facility_name,
+        "total_annual_emissions": filtered['co2_emitted_tonnes'].sum(),
+        "mean_annual_emissions": filtered['co2_emitted_tonnes'].mean(),
+        "mean_capture_efficiency": filtered['capture_efficiency_percent'].mean(),
+        "mean_storage_integrity": filtered['storage_integrity_percent'].mean(),
+        "minimum_capture_efficiency": filtered['capture_efficiency_percent'].min(),
+        "minimum_storage_integrity": filtered['storage_integrity_percent'].min()
     }
 
     return stats
