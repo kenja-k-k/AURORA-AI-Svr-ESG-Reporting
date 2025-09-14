@@ -10,3 +10,28 @@ message UploadCSVResponse {
   string status = 1;
   string message = 2;
 }
+
+message GenerateEsgReportRequest {
+  string facility_name = 1;
+}
+
+message StatsData {
+  string facility_name = 1;
+  double total_annual_emissions = 2;
+  double mean_annual_emissions = 3;
+  double mean_capture_efficiency = 4;
+  double mean_storage_integrity = 5;
+  double minimum_capture_efficiency = 6;
+  double minimum_storage_integrity = 7;
+}
+message GenerateEsgReportResponse {
+  string esg_report = 1;
+  StatsData stats_data = 2;
+
+}
+
+service EsgReportService {
+  rpc UploadCSV(UploadCSVRequest) returns (UploadCSVResponse);
+
+  rpc GenerateEsgReport(GenerateEsgReportRequest) returns (GenerateEsgReportResponse);
+}

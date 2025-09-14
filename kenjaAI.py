@@ -54,4 +54,5 @@ async def get_esg_report(payload:dict):
     async with httpx.AsyncClient(timeout=time_out) as client:
         response = await client.post(url, headers=headers, json=request_body)
         response.raise_for_status()
-        return response.json()
+        esg_output = response.json()
+        return esg_output["response"]["content"]
