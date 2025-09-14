@@ -58,7 +58,7 @@ csv_path = None
 
 def use_csv():
     global csv_path, data
-    csv_path = fr".\csv_dataset.csv"
+    csv_path = fr".\csv_dataset"
     if os.path.exists(csv_path):
        data = pd.read_csv(csv_path)
     else:
@@ -73,7 +73,7 @@ async def upload_csv(file: UploadFile = File(...)):
     #timestamp = datetime.now().astimezone().strftime("%Y-%m-%d_%H-%M-%S_%Z")
     #csv_path = f"./{timestamp}_{file.filename}" #save file to local dir
     file_name = "csv_dataset"
-    file_path = f"./{file.filename}"
+    file_path = f"./{file_name}"
     with open(file_path, "wb") as f:
         f.write(await file.read())
     """
