@@ -9,6 +9,7 @@ The service demonstrates how simulated IoT data from Carbon Capture and Storage 
 ## 1. High-Level Architecture
 
 The AURORA system integrates **SingularityNET**, AI Services, blockchain-based verification, and IoT data streams into a cohesive decentralized platform.
+All three services are independent of each other and can therefore be used individually. However, they are hosted on the same server.
 
 ### System Overview
 ![Aurora component diagram](https://github.com/kenja-k-k/AURORA-AI-Svr-ESG-Reporting/blob/main/Aurora%20component%20diagram.jpg)
@@ -16,29 +17,36 @@ The AURORA system integrates **SingularityNET**, AI Services, blockchain-based v
 ### Key Components
 - **SingularityNET Integration**
   - Users and admins access the **Marketplace** and **Publisher Portal** to test and deploy AI services.
-  - The ESG Reporting service will be published to the marketplace for discovery and consumption.
+  - The ESG Reporting service is published to the marketplace for discovery and consumption.
+  - The main way to use the service is as a component to be integrated into an external/pre-existing system, by said system calling the service's exposed endpoint(s) through the daemon. Frontend display and further processing of this or other services' outputs are up to the aforementioned system. By making these kinds of integratable components (services) available, SingularityNET simplifies AI application development.
 
 - **Virtual Machine / Backend**
   - Each AI service is intended to be run inside **isolated containers**:
     - **Service 1 (CO₂ Analytics)** – Operational performance and anomaly detection.
     - **Service 2 (CO₂ Predictive Analytics)** – Seasonal trends and forecasting.
-    - **Service 3 (ESG Reporting)** – Implemented in this repository (under development).
-  - Blockchain hashing ensures secure and tamper-proof records.
+    - **Service 3 (ESG Reporting)** – Implemented in this repository.
+  - Blockchain hashing (placeholder in Poc) ensures secure and tamper-proof records through creating cyptographic fingerprints.
   - IoT data streams (simulated in PoC) feed into the analytics service for processing.
+
+- **Daemon**
+  - This acts as your trusted **gateway** between SingularityNET and your chosen service.
+  - You interact with the daemon using the standard SingularityNET tools (SDKs, CLI).
+  - The daemon exposes the standard SingularityNET API endpoint. It takes care of **authentication** and payment **verification** automatically, so only valid, authorized requests reach the AI service.
+  - It ensures requests are properly formatted and reliably delivered, while also handling responses back to your application.
+  - This design means your application connects to our service in a secure, predictable, and marketplace-compliant way, without needing to worry about the internal details of our infrastructure.
 
 - **Frontend (Optional)**  
   - A dashboard visualizes ESG metrics, immediate performance trends, and alerts.  
-  - [PLACEHOLDER: Final integration of frontend components pending.]  
+  - Mostly for demo purposes, there is a dedicated simple frontend available, to visualize the services' generated outputs. It is connected to the service backend through the daemon in the same way as intended in the original way of use. Direct access to the frontend code deployment (on the VM) is neded for this setup.
 
 - **Database Container**  
-  - Stores processed data and enables querying for ESG reporting.  
-  - [PLACEHOLDER: Database schema and integration not finalized.]  
+  - Stores processed data and enables querying for ESG reporting. 
 
 ---
 
 ## 2. Role of This Service
 
-This repository specifically implements **Service 3 Backend (ESG Reporting)** highlighted in **Container 1** of the architecture.
+This repository specifically implements **Service 3 Backend (ESG Reporting)** highlighted in **Container 3** of the architecture.
 
 - **Input:** Simulated IoT data streams mimicking CCS facility operations (CO₂ emissions, capture efficiency, storage conditions, etc.).  
 - **Output:** ESG metrics, live performance trends, benchmark comparisons, and simple natural-language ESG reports.  
@@ -48,8 +56,18 @@ This service extends the AURORA platform by focusing on **ESG goal alignment and
 
 ### Choice of Models (LightGBM + LLM)
 - **LightGBM**: An ensemble model trained on multiple variables (facility type, region, season) to classify whether performance meets ESG goals.  
-- **Lightweight LLM (Phi-3-mini-128k)**: Used for natural language responses to ESG-related queries. The LLM uses a **RAG pipeline** combining structured data (CSV) and unstructured guidance (guidelines.txt).  
-- [PLACEHOLDER: Model hyperparameters, training dataset size, and benchmarking results to be finalized.]  
+- **Lightweight LLM (Phi-3-mini-128k)**: Used for natural language responses to ESG-related queries. The LLM uses a **RAG pipeline** combining structured data (CSV) and unstructured guidance (guidelines.txt).    
+
+### Choice of Frameworks
+For this service, we align with two complementary ESG reporting frameworks. GRI establishes a reliable baseline for emissions reporting, while TCFD enables more strategic, risk-oriented disclosure.
+- **Global Reporting Initiative (GRI)**: A widely used framework that provides transparent reporting on environmental impacts such as emissions and capture efficiency. It was selected because it is relatively straightforward to implement with the data already collected (e.g., CO₂ emitted, CO₂ captured, efficiency percentages). It allows us to present transparent facility-level metrics and compare them against benchmarks.
+- **Task Force on Climate-related Financial Disclosures (TCFD)**: A forward-looking framework emphasizing scenario analysis and climate risk disclosure. This was chosen because it aligns well with the predictive capabilities of our service. Using models such as LightGBM, we generate forecasts of future capture efficiency and emissions. This supports TCFD’s emphasis on climate scenario analysis and resilience planning, extending our ESG reporting beyond historical tracking into forward-looking insights.
+
+**Future Considerations**: As the service evolves from Proof of Concept (POC) to Minimum Viable Product (MVP) and eventually to production, the chosen framework(s) can be re-evaluated. Key considerations for switching or expanding frameworks include:
+- Availability of financial data (enabling SASB alignment).
+- Client requirements for compliance with CSRD/ESRS or other regional regulations.
+- Expansion of tracked variables (e.g., environmental, social, and governance metrics beyond emissions).
+For now, GRI + TCFD provide the most practical and justifiable combination given our dataset and the service’s current purpose: delivering live, actionable ESG insights.
 
 ---
 
@@ -62,7 +80,7 @@ The **Proof of Concept (PoC)** demonstrates three primary features using simulat
 |------------|---------------------------|-----------------------------------------------------------------------------|
 | **3.1**    | Immediate Trend Detection | Detects short-term trends (“Rising”, “Falling”, “Stable”) in CCS performance metrics. |
 | **3.2**    | ESG Goal Alignment        | Compares facility performance to global benchmarks and flags deviations.    |
-| **3.3**    | Natural Language Reports  | Generates simple ESG-focused summaries using a lightweight LLM and RAG pipeline. |
+| **3.3** *(planned)*    | Natural Language Reports  | Generates simple ESG-focused summaries using a lightweight LLM and RAG pipeline. |
 
 **Summary of PoC Objectives:**
 - Demonstrate ESG analytics using **simulated IoT data**.  
@@ -75,7 +93,6 @@ The **Proof of Concept (PoC)** demonstrates three primary features using simulat
 
 The repository is structured to reflect the modular design of the ESG Reporting service.  
 Core components include analytics modules, LLM/RAG pipelines, sample datasets, and deployment files.  
-[PLACEHOLDER: Structure may change as development continues.]
 
 | Path / File                | Description                                                                                       | Related Features |
 |-----------------------------|---------------------------------------------------------------------------------------------------|------------------|
