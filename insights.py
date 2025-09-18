@@ -1,6 +1,7 @@
 import pandas as pd
 from typing import Literal
 import numpy as np
+from datetime import datetime
 
 #To get facility names___________________
 def facility_names(data):
@@ -157,13 +158,79 @@ def add_season(data: pd.DataFrame) -> pd.DataFrame:
     data["season"] = data["month"].apply(month_to_season)
     return data
 
-#For comparision with global 
-def global_bench(data, bench, facility_name: str):
-    filtered = data[data["facility_name"] == "facility_name"]
-    filtered = add_season(filtered)
-    fc_type = filtered["storage_site_type"].drop_duplicates().tolist()
-    region = filtered["region"].drop_duplicates().tolist()
-    benchmarks = bench[bench["storage_site_type"].isin(fc_type) & bench["region"].isin(region)]
+
+#For comparing performance relative to benchmrks________________
+"""
+To use this functionality, both functions below are needed.
+Also, a reference file containing benchmark is needed. 
+Currently, the bench.csv file is being used as benchmarks, but this can also be done dynamically.
+Problems: Returning the numbers from the compare_performance seems to include NaN values
+          for some reason. Not sure what the problem is here. 
+          So added the option to not return the numbers for now.
+"""
+def global_bench_report(stats_df: pd.DataFrame, facility_name:str, drop_facility: bool = False) -> dict:
+    df = stats_df.copy()
+
     
-    #Will compare the entries to the benchmark and return facilities that underperformed
-    return filtered, benchmarks     
+    df["Performance"] = df.apply(
+        lambda row: "Lagging" if row["Facility"] < (row["Benchmarks"] * 0.95) else "Leading", # Assigniing a label based on somg conditions
+        axis=1
+    )
+
+    # These cols may be dropped if not needed.
+    if drop_facility:
+        df = df.drop(columns=["Benchmarks"])
+        df = df.drop(columns=["Facility"])
+
+    # Convert to list of dicts for FastAPI JSON response
+    stats_list = df.to_dict(orient="records")
+
+    return {
+        "message": f"Performance stats for {facility_name} relative to similar facilities in the region are as follows",
+        "stats": stats_list
+    }
+
+
+def compare_performance(facility_name: str, data: pd.DataFrame, bench: pd.DataFrame) -> pd.DataFrame:
+    # Filter the facility
+    filtered = data[data["facility_name"] == facility_name].copy()
+
+    if filtered.empty:
+        raise ValueError(f"No data found for facility '{facility_name}'")
+
+    # Add season column
+    filtered = add_season(filtered)  # Assume add_season adds a 'season' column
+
+    # Use latest year only
+    filtered["date"] = pd.to_datetime(filtered["date"], format="%d/%m/%Y", errors="coerce")
+    latest_year = pd.Timestamp.now().year
+    filtered = filtered[filtered["date"].dt.year == (latest_year-1)]
+
+    if filtered.empty:
+        raise ValueError(f"No data for {facility_name} in year {latest_year-1}")
+
+    # Identify storage type and region for benchmark
+    storage_type = filtered["storage_site_type"].iloc[0]
+    region = filtered["region"].iloc[0]
+    benchmark = bench[(bench["storage_site_type"] == storage_type) &
+                      (bench["region"] == region)].copy()
+
+    if benchmark.empty:
+        raise ValueError(f"No benchmark found for {storage_type} in {region}")
+
+    # Compute mean carbon capture per season
+    seasons = ["summer", "autumn", "winter", "spring"]
+    stats_list = []
+    for season in seasons:
+        facility_mean = filtered[filtered["season"] == season]["co2_captured_tonnes"].mean()
+        bench_mean = benchmark[benchmark["season"] == season]["co2_captured_tonnes"].iloc[0]
+        stats_list.append({
+            "Season": season,
+            "Facility": facility_mean,
+            "Benchmarks": bench_mean
+        })
+
+    stats_df = pd.DataFrame(stats_list)
+    return global_bench_report(stats_df, facility_name, True)
+
+
