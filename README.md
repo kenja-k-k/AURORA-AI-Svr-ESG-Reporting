@@ -42,6 +42,9 @@ All three services are independent of each other and can therefore be used indiv
 - **Database Container**  
   - Stores processed data and enables querying for ESG reporting. 
 
+**Components interact as follows**
+![Aurora sequence diagram](https://github.com/kenja-k-k/AURORA-AI-Svr-ESG-Reporting/blob/main/Aurora%20sequence%20diagram.png)
+
 ---
 
 ## 2. Role of This Service
@@ -74,7 +77,6 @@ For now, GRI + TCFD provide the most practical and justifiable combination given
 ## 3. PoC Features and Requirements
 
 The **Proof of Concept (PoC)** demonstrates three primary features using simulated IoT data, as specified in the *ESG Reporting Specification*:
-[PLACEHOLDER: All features to be confirmed and finalized.]
 
 | Feature ID | Feature Name              | Description                                                                 |
 |------------|---------------------------|-----------------------------------------------------------------------------|
@@ -100,7 +102,7 @@ Core components include analytics modules, LLM/RAG pipelines, sample datasets, a
 | **`saved_models/`**                  | Directory for storing trained LightGBM models per facility.                                       | 3.2 |
 | **`.env.example`**                   | Example environment variables for configuring the service (API keys, paths, etc.).                | Deployment |
 | **`.gitignore`**                     | Rules to exclude Python/IDE/cache files from git.                                                 | Housekeeping |
-| **`Aurora component diagram.jpg`**   | High-level component diagram of the ESG Reporting service.                                         | Documentation |
+| **`Aurora component diagram.jpg, Aurora sequence diagram.png, Aurora service 1 insights generation flow.jpg`**   | Diagrams of the Aurora project and ESG Reporting service.                                         | Documentation |
 | **`README.md`**                      | Project overview, installation, and usage instructions (this file).                               | Documentation |
 | **`bench.csv`**                      | Benchmark dataset for comparing facility metrics to global/regional standards.                     | 3.2 |
 | **`data.csv`**                       | Example dataset with CCS facility performance data.                                               | Demo |
