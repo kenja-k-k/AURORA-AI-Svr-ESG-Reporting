@@ -53,6 +53,7 @@ This repository specifically implements **Service 3 Backend (ESG Reporting)** hi
 
 - **Input:** Simulated IoT data streams mimicking CCS facility operations (CO₂ emissions, capture efficiency, storage conditions, etc.).  
 - **Output:** ESG metrics, live performance trends, benchmark comparisons, and simple natural-language ESG reports.  
+- **Insights Generation:** You can check the `insights.py` file to see the code for generating the insights. This code file includes highly detailed comments explaining the steps taken, understandable also for non-developers.
 - **Blockchain Integration:** Hashes analytics data to the **internal Blockchain Hashing Service** for verifiable storage (separate from SingularityNET’s Ethereum metering).  
 
 This service extends the AURORA platform by focusing on **ESG goal alignment and explainability**, helping operators and stakeholders interpret the operational data in business and sustainability terms.
