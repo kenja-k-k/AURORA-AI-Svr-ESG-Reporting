@@ -126,3 +126,105 @@ Core components include analytics modules, LLM/RAG pipelines, sample datasets, a
    ```bash
    git clone https://github.com/kenja-k-k/AURORA-AI-Svr-ESG-Reporting.git
    cd AURORA-AI-Svr-ESG-Reporting
+2. **Build and run the container:**
+  The first one will build the three images specified in the docker-compose.yml file (the service, the ETCD store and the daemon).
+The second one will start the containers based on the built images. There is no need to specify ports and names of containers, as everything is specified in the docker-compose.yml file.
+   ```bash
+   docker compose build
+   docker compose up -d
+3. **Access the service:**
+    Backend API: http://localhost:7000
+    Optional frontend dashboard: http://localhost:3000
+4. **Publish to SingularityNet testnet (optional)**
+      Configure daemon files in /backend/daemon/.
+      Use the SingularityNET Publisher Portal
+
+## 6. Deployment Instructions for True Integration
+
+Our service is available on the **SingularityNET Marketplace**. You can integrate it into your application in just a few steps.
+- You don’t interact with our infrastructure directly.
+- You just use the SingularityNET CLI or SDK.
+- The daemon + marketplace handle authentication, payments, and routing to our AI service.
+
+### 1. Create a SingularityNET Account
+1. Go to the [SingularityNET Marketplace] (https://beta.singularitynet.io/).  
+2. Create an account.
+3. Link your **Metamask (or compatible wallet)**
+4. Fund your wallet with **AGIX tokens** (required for service usage).
+
+### 2. Install the SingularityNET CLI or SDK
+**Prerequisites**
+- **Python 3.8+** for CLI and Python SDK  
+- **Node.js (LTS)** if using the JavaScript SDK
+
+**Steps**
+1. Install the CLI with pip
+   ```bash
+   pip install snet-cli
+3. (Optional) Install SDKs for integration (Python or JavaScript SDK)
+
+### 3. Open a Payment Channel
+**Prerequisites**
+- SNET CLI installed and configured
+- AGIX tokens available in your wallet
+
+**Steps**
+1. Deposit AGIX into your account
+   ```bash
+   snet account deposit 100
+3. Open a payment channel for the service
+   ```bash
+   snet channel open <org_id> <service_id> 10 1
+
+Where:
+- `<org_id>` → the organization ID on the marketplace
+- `<service_id>` → the identifier of our AI service
+- `10` → amount of AGIX tokens allocated
+- `1` → channel expiration in blocks
+
+### 4. Call the Service
+**Prerequisites**
+- Open payment channel to our service
+- Service method name (from marketplace metadata)
+
+**Steps**
+1. Call the service via CLI
+   ```bash
+   snet call <org_id> <service_id> <service_method> \
+   -y '{"input": "Your request here"}'
+2. Or call the service via Python SDK
+   ```bash
+   from snet import sdk
+   snet_sdk = sdk.SnetSDK(config_path="~/.snet/config")
+   client = snet_sdk.create_service_client(
+       org_id="<org_id>",
+       service_id="<service_id>",
+       group_name="default_group"
+   )
+   response = client.call_rpc("service_method", {"input": "Your request here"})
+   print(response)
+
+### 5. Integrate Into Your Application
+**Prerequisites**
+- Working backend (Python, Node.js, or other supported runtime)
+- Access to the SNET SDK or CLI
+
+**Steps**
+1. Wrap the SDK call into your backend service or workflow.
+2. Pass inputs from your application into the request.
+3. Handle the responses just like any other API result.
+4. Rely on the daemon to ensure authentication, payments, and secure execution.
+
+### 6. Monitor & Manage Usage
+**Prerequisites**
+- SNET CLI configured
+- Active payment channels
+
+**Steps**
+1. Check channel balance
+   ```bash
+   snet channel balance
+3. Extend or open new channels as needed
+   ```bash
+   net channel extend-add-for-service <org_id> <service_id> 10 10000
+4. Monitor logs and metrics through your SingularityNET account dashboard.
