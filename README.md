@@ -94,21 +94,27 @@ The **Proof of Concept (PoC)** demonstrates three primary features using simulat
 The repository is structured to reflect the modular design of the ESG Reporting service.  
 Core components include analytics modules, LLM/RAG pipelines, sample datasets, and deployment files.  
 
-| Path / File                | Description                                                                                       | Related Features |
-|-----------------------------|---------------------------------------------------------------------------------------------------|------------------|
-| **`.gitignore`**            | Rules to exclude Python/IDE/cache files from git.                                                 | Housekeeping |
-| **`data.csv`**              | Example dataset with CCS facility performance data.                                               | Demo |
-| **`dataset_file.csv`**      | Sample dataset for ESG metrics analysis.                                                          | Demo |
-| **`get_annual_stats response.json`** | Example output for annual ESG metrics.                                                     | Demo |
-| **`get_esg response example.json`**  | Example output for ESG query.                                                              | Demo |
-| **`llm response example.json`**      | Example response from LLM query.                                                           | Demo |
-| **`guidelines.txt`**        | ESG guidelines document used in the RAG pipeline.                                                 | 3.3 |
-| **`insights.py`**           | Analytics logic: trend detection, percent change calculations, ESG benchmarking.                  | 3.1, 3.2 |
-| **`models.py`**             | LightGBM model implementation for ESG goal checks.                                                | 3.2 |
-| **`rag.py`**                | Retrieval-Augmented Generation logic for LLM queries.                                             | 3.3 |
-| **`requirements.txt`**      | Python dependencies for the service (FastAPI, pandas, scikit-learn, LightGBM, etc.).              | Deployment |
-| **`service.py`**            | FastAPI entry point exposing endpoints: `get_esg`, `get_trend`, `get_graph`, `get_annual_stats`.   | 3.1, 3.2, 3.3 |
-| **`README.md`**             | Project overview, installation, and usage instructions (this file).                               | Documentation |
+| Path / File                          | Description                                                                                       | Related Features |
+|--------------------------------------|---------------------------------------------------------------------------------------------------|------------------|
+| **`protos/`**                        | Protocol Buffers definitions for gRPC communication.                                              | Deployment |
+| **`saved_models/`**                  | Directory for storing trained LightGBM models per facility.                                       | 3.2 |
+| **`.env.example`**                   | Example environment variables for configuring the service (API keys, paths, etc.).                | Deployment |
+| **`.gitignore`**                     | Rules to exclude Python/IDE/cache files from git.                                                 | Housekeeping |
+| **`Aurora component diagram.jpg`**   | High-level component diagram of the ESG Reporting service.                                         | Documentation |
+| **`README.md`**                      | Project overview, installation, and usage instructions (this file).                               | Documentation |
+| **`bench.csv`**                      | Benchmark dataset for comparing facility metrics to global/regional standards.                     | 3.2 |
+| **`data.csv`**                       | Example dataset with CCS facility performance data.                                               | Demo |
+| **`get_annual_stats response.json`** | Example output for annual ESG metrics.                                                            | Demo |
+| **`get_esg response example.json`**  | Example output for ESG query.                                                                     | Demo |
+| **`grpc_server.py`**                 | gRPC server implementation to allow remote calls to ESG endpoints.                                | Deployment |
+| **`guidelines.txt`**                 | ESG guidelines document used in the RAG pipeline.                                                 | 3.3 |
+| **`insights.py`**                    | Analytics logic: trend detection, percent change calculations, ESG benchmarking.                  | 3.1, 3.2 |
+| **`kenjaAI.py`**                     | gRPC service handler integrating business logic with the server.                                  | Deployment |
+| **`llm response example.json`**      | Example response from LLM query.                                                                  | Demo |
+| **`models.py`**                      | LightGBM model implementation and training for ESG goal checks.                                   | 3.2 |
+| **`rag.py`**                         | Retrieval-Augmented Generation logic for LLM queries.                                             | 3.3 |
+| **`requirements.txt`**               | Python dependencies for the service (FastAPI, pandas, scikit-learn, LightGBM, etc.).              | Deployment |
+| **`service.py`**                     | FastAPI entry point exposing endpoints: `get_esg`, `get_trend`, `get_graph`, `get_annual_stats`.   | 3.1, 3.2, 3.3 |
 
 ---
 
