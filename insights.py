@@ -1,30 +1,40 @@
+# IMPORTS: Bringing in the tools we need
+# -------------------------------
 import pandas as pd
 from typing import Literal
 import numpy as np
 from datetime import datetime
 
-#To get facility names___________________
+
+# -------------------------------------------------------------------------------------
+# FUNCTION 1: Get/list facility names
+# What it does: Returns a list of unique facility names available in the dataset. Useful to know which facilities can be queried.
+
+
 def facility_names(data):
     #global data, names
-    if data.empty:
+    if data.empty:                                        # STEP 1: If dataset is empty → return warning
         return "Set a csv source data first"
     else:
-        names = list(set(data["facility_name"]))
-        return names
+        names = list(set(data["facility_name"]))          # STEP 2: Collect unique names from the "facility_name" column
+        return names                                      # STEP 3: Output = list of facility names
 
-#For trends over a period of time
+# -------------------------------------------------------------------------------------
+
+
+# FUNCTION 2: Trend detection
+# What it does: Detects short-term trend of a chosen variable (e.g. emissions or efficiency). Uses the last 5 records of that facility.
+
 def trends(facility_name: str, data, variable: str):
-    # Filter rows for facility and column
-    filtered = data[data["facility_name"] == facility_name].dropna(subset=[variable])
+    filtered = data[data["facility_name"] == facility_name].dropna(subset=[variable])     # STEP 1: Filter dataset for the requested facility + variable (column)
 
     if filtered.empty:
         return "No data to get trends."
 
-    # Use last 5 raw values
-    last_5 = filtered[variable].tail(5)
+    last_5 = filtered[variable].tail(5)                          # STEP 2: Take last 5 raw values of the chosen variable
 
     # Compare first and last
-    if last_5.iloc[-1] > last_5.iloc[0]:
+    if last_5.iloc[-1] > last_5.iloc[0]:                         # STEP 3: Compare first vs last value → Rising / Falling / Stable
         return f"{variable} Rising"
     elif last_5.iloc[-1] < last_5.iloc[0]:
         return f"{variable} Falling!"
@@ -32,7 +42,12 @@ def trends(facility_name: str, data, variable: str):
         return f"{variable} Stable"
 
 
-#For relative percent changes__________
+# -------------------------------------------------------------------------------------
+
+
+# FUNCTION 3: Relative Percent Changes
+# What it does: Calculates % change for a chosen variable between consecutive records. Example: "emissions increased by 3% since the last entry".
+
 def get_percent_changes(facility_name: str, data, variable: str): 
     """
     if variable not in data.columns:
@@ -41,31 +56,36 @@ def get_percent_changes(facility_name: str, data, variable: str):
         raise ValueError(f"Invalid facility name. Please check the facility name")
     """
 
-    filtered = data[data["facility_name"] == facility_name].dropna(subset=[variable]).copy()
+    filtered = data[data["facility_name"] == facility_name].dropna(subset=[variable]).copy()     # STEP 1: Filter rows for facility + drop missing values
 
-    filtered["percent_changes"] = filtered[variable].pct_change()*100
-    filtered["percent_changes"] = filtered["percent_changes"].fillna(0)
-    changes = filtered[["date", "percent_changes"]]
+    filtered["percent_changes"] = filtered[variable].pct_change()*100                            # STEP 2: Calculate percent change from one record to the next
+    filtered["percent_changes"] = filtered["percent_changes"].fillna(0)                          # STEP 3: Replace missing changes (first row) with 0
+    changes = filtered[["date", "percent_changes"]]                                              # STEP 4: Output = table of dates + percent changes
 
     return f"The relative changes for {variable}, for the facility {facility_name} are as follows", changes
 
-#For annual statistics
+# -------------------------------------------------------------------------------------
+
+
+# FUNCTION 4: Annual Statistics (yearly ESG summary)
+# What it does: Summarizes annual performance metrics for a facility. Returns totals, means, and minimums for the last year.
+
 def annual_stats(data: pd.DataFrame, facility_name: str, fallback: bool = True) -> dict:
     
-    if data.empty: 
+    if data.empty:                                                                              # STEP 1: Validate dataset and facility
         raise ValueError("The dataset is empty. Please set the CSV data first.")
     
     if facility_name not in data["facility_name"].unique():
         raise ValueError(f"Facility '{facility_name}' not found in the dataset.")
     
     # We will not include outliers, therefore dont need anomalies
-    data = data[(data["facility_name"] == facility_name) & (data["anomaly_flag"] == False)].copy()
+    data = data[(data["facility_name"] == facility_name) & (data["anomaly_flag"] == False)].copy()    # STEP 2: Keep only rows for this facility, excluding anomalies
     
     # Pandas really needs its own datetime dataframe
-    data["date"] = pd.to_datetime(data["date"], format="%d/%m/%Y", dayfirst=True, errors="coerce")
+    data["date"] = pd.to_datetime(data["date"], format="%d/%m/%Y", dayfirst=True, errors="coerce")    # STEP 3: Ensure date column is in proper format + extract year
     data["year"] = data["date"].dt.year
 
-    current_year = data["year"].max() #Check the latest year, this will not work without datetime format
+    current_year = data["year"].max()     # STEP 4: Check the latest year, this will not work without datetime format. Pick last full year (target), or fallback to current year
     target_year = current_year - 1    #Add the last year as target 
 
     filtered = data[data["year"] == target_year]
@@ -74,7 +94,7 @@ def annual_stats(data: pd.DataFrame, facility_name: str, fallback: bool = True) 
     if fallback and filtered.empty:
         filtered = data[data["year"] == current_year]
 
-    stats = {
+    stats = {                                             # STEP 5: Calculate ESG metrics
         "facility_name": facility_name,
         "total_annual_emissions": filtered['co2_emitted_tonnes'].sum(),
         "mean_annual_emissions": filtered['co2_emitted_tonnes'].mean(),
@@ -84,9 +104,14 @@ def annual_stats(data: pd.DataFrame, facility_name: str, fallback: bool = True) 
         "minimum_storage_integrity": filtered['storage_integrity_percent'].min()
     }
 
-    return stats
+    return stats                                          # STEP 6: Output = ESG summary dictionary
 
-#Get stats for a give range of dates.
+# -------------------------------------------------------------------------------------
+
+
+# FUNCTION 5: Stats by Custom Date Range
+# What it does: Calculates ESG metrics/stats for a custom range of dates.
+
 def stats_by_range(data: pd.DataFrame, facility_name: str, start_date: str, end_date: str):
     """
     Dates for this function must be in dd/mm/yyyy.
@@ -95,14 +120,13 @@ def stats_by_range(data: pd.DataFrame, facility_name: str, start_date: str, end_
     This has caused some issues before.
     """
 
-    if data.empty: 
+    if data.empty:                                                                             # STEP 1: Validate dataset + facility
         raise ValueError("No data found. Set the source CSV data before anything.")
 
     if facility_name not in data["facility_name"].unique():
         raise ValueError(f"Facility '{facility_name}' not found in the source csv.")
 
-    filtered = data[(data["facility_name"] == facility_name) & (data["anomaly_flag"] == False)].copy() #Dont want anomalies here, so
-
+    filtered = data[(data["facility_name"] == facility_name) & (data["anomaly_flag"] == False)].copy() # STEP 2: Filter rows for facility, excluding anomalies
     
     filtered["date"] = pd.to_datetime(filtered["date"], format="%d/%m/%Y", dayfirst=True, errors="coerce") # Making sure that the dates col is properly formatted
 
@@ -111,19 +135,18 @@ def stats_by_range(data: pd.DataFrame, facility_name: str, start_date: str, end_
     Using coerce for error for now, because this is poc.
     Might use different error becavior later on in production
     """
-    start_date = pd.to_datetime(start_date, format="%d/%m/%Y", dayfirst=True, errors="coerce")  
+    start_date = pd.to_datetime(start_date, format="%d/%m/%Y", dayfirst=True, errors="coerce")      # STEP 3: Convert start/end dates to datetime
     end_date = pd.to_datetime(end_date, format="%d/%m/%Y", dayfirst=True, errors="coerce")
 
     if pd.isna(start_date) or pd.isna(end_date):
         raise ValueError("Invalid start_date or end_date format or both. Use ther dd/mm/yyyy format.")
 
-    # Filter by date range
-    date_filtered = filtered[(filtered["date"] >= start_date) & (filtered["date"] <= end_date)]
+    date_filtered = filtered[(filtered["date"] >= start_date) & (filtered["date"] <= end_date)]     # STEP 4: Filter dataset for that range
 
     if date_filtered.empty:
         return {"message": f"No data available for {facility_name} between {start_date.date()} and {end_date.date()}"}
 
-    stats = {
+    stats = {                                                                                       # STEP 5: Calculate metrics
         "Date range": f"{start_date.date()} to {end_date.date()}",
         "Total emissions": f"{date_filtered['co2_emitted_tonnes'].sum()} tonnes",
         "Mean emissions": f"{date_filtered['co2_emitted_tonnes'].mean()} tonnes",
@@ -133,17 +156,22 @@ def stats_by_range(data: pd.DataFrame, facility_name: str, start_date: str, end_
         "Minimum storage integrity": f"{date_filtered['storage_integrity_percent'].min()} %"
     }
 
-    return f"The metrics for the {facility_name} facility are as below", stats 
+    return f"The metrics for the {facility_name} facility are as below", stats                     # STEP 6: Output = text + metrics dictionary
 
-#Add a season column in a df
+# -------------------------------------------------------------------------------------
+
+
+
+# FUNCTION 6: Add Season Column
+# What it does: Add a "season" column in a df based on month of the year. Example: Jan = Winter, Jul = Summer.
+
 def add_season(data: pd.DataFrame) -> pd.DataFrame:
-    data = data.copy()
+    data = data.copy()                                        # STEP 1: Copy dataset + ensure date is datetime
     # Ensure 'date' is datetime
     data["date"] = pd.to_datetime(data["date"], format="%d/%m/%Y", dayfirst=True, errors="coerce")
     data["month"] = data["date"].dt.month
 
-    # Map months to seasons
-    def month_to_season(month: int) -> str:
+    def month_to_season(month: int) -> str:                   # STEP 2: Map month → season
         if month in [12, 1, 2]:
             return "Winter"
         elif month in [3, 4]:
@@ -156,10 +184,15 @@ def add_season(data: pd.DataFrame) -> pd.DataFrame:
             return None  # in case of missing or invalid dates
 
     data["season"] = data["month"].apply(month_to_season)
-    return data
+    return data                                                      # STEP 3: Output = enriched dataset with new "season" column
+
+# -------------------------------------------------------------------------------------
 
 
-#For comparing performance relative to benchmrks________________
+# FUNCTION 7: Compare with Global Benchmarks
+# What it does: Compares facility performance with global benchmark values. Benchmarks are filtered by facility’s type and region.
+
+
 """
 To use this functionality, both functions below are needed.
 Also, a reference file containing benchmark is needed. 
@@ -232,5 +265,4 @@ def compare_performance(facility_name: str, data: pd.DataFrame, bench: pd.DataFr
 
     stats_df = pd.DataFrame(stats_list)
     return global_bench_report(stats_df, facility_name, True)
-
-
+# -------------------------------------------------------------------------------------
