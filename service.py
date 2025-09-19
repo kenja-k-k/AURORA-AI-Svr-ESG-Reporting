@@ -11,10 +11,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timezone, timedelta
 from typing import Literal, Optional
 import joblib
-
+from fastapi.encoders import jsonable_encoder
 
 #Refactor from modules
-from insights import get_percent_changes, trends, global_bench, annual_stats, stats_by_range
+from insights import get_percent_changes, trends, annual_stats, stats_by_range, global_bench_report, compare_performance
 from kenjaAI import get_esg_report
 from models import LGBM_regressor
 #from rag import RAGPipeline
@@ -49,9 +49,30 @@ class GlobalInput(BaseModel):
     storage_integrity_percent   : float | None = None
     #anomaly_flag                :
 
-
+#Initialize globals, then load at startup._________________
 data = pd.DataFrame()
 csv_path = None
+bench = pd.DataFrame()
+
+@app.on_event("startup")
+def load_files():
+    global data, bench
+    try:
+        if os.path.exists("data.csv"):
+            data = pd.read_csv("data.csv")
+            print("data.csv loaded.")
+        else:
+            print("data.csv not found.")
+
+        if os.path.exists("bench.csv"):
+            bench = pd.read_csv("bench.csv")
+            print("bench.csv loaded.")
+        else:
+            print("bench.csv not found.")
+    except Exception as e:
+        print(f"Error loading the csv files: {e}")
+
+
 
 
 #To set a csv as data___________________
@@ -84,7 +105,7 @@ async def upload_csv(file: UploadFile = File(...)):
     return {"status": "success", "message": f"Your csv has been uploaded, and saved to {file_path}"}
 
 #Get the facility names
-def facility_names():
+async def facility_names():
     global data, names 
     if data.empty:
         return "Set a csv source data first"
@@ -167,18 +188,21 @@ async def get_trends(facility_name: Literal["Alpha CCS Plant",
     return trends(facility_name, data, variable)
 
 
-#Get annual metrics for a facility_______________
-"""
+#Get relative performance for a facility_______________
+@app.get("/get_relative_performance")
+async def get_relative_performance(facility_name: str):
+    global data, bench
+    
+    stats = compare_performance(facility_name, data, bench)
+    return stats
+    
 
-@app.get("/get_annual_stats")
-def get_annual_stats(facility_name:str):
-    global data, file_path
 
-    return annual_stats(data, facility_name)
-"""
+    
 
 
-#Get stats for a given period______________
+
+#Get stats for a given period (can be annual if needed)______________
 @app.get("/generate_esg_report")
 async def generate_esg_report(
                         facility_name: str,
