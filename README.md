@@ -60,7 +60,7 @@ This service extends the AURORA platform by focusing on **ESG goal alignment and
 
 ### Choice of Models (LightGBM + LLM)
 - **LightGBM**: An ensemble model trained on multiple variables (facility type, region, season) to classify whether performance meets ESG goals.  
-- **Lightweight LLM (Phi-3-mini-128k)**: Used for natural language responses to ESG-related queries. The LLM uses a **RAG pipeline** combining structured data (CSV) and unstructured guidance (guidelines.txt).    
+- **GPT 4.1 mini with Kenja RAG (LLM)**: Used for natural language responses to ESG-related queries. The LLM uses a **RAG pipeline** combining structured data (CSV) and unstructured guidance (guidelines.txt). Kenja AI is being used to generate LLM responses for user queries. Kenja RAG will be used on the source documents for guidelines, and along with the facility data, will be used to generate output with GPT 4.1 mini. 
 
 ### Choice of Frameworks
 For this service, we align with two complementary ESG reporting frameworks. GRI establishes a reliable baseline for emissions reporting, while TCFD enables more strategic, risk-oriented disclosure.
