@@ -43,7 +43,6 @@ class EsgReportService(service_pb2_grpc.EsgReportServiceServicer):
         global data, file_path
         csv_path = fr".\csv_dataset.csv"
 
-        print(os.path.exists(csv_path))
         if not os.path.exists(csv_path):
             context.set_code(grpc.StatusCode.NOT_FOUND)
             context.set_details("CSV not found on server. Please check the file name.")
@@ -74,7 +73,10 @@ class EsgReportService(service_pb2_grpc.EsgReportServiceServicer):
                     mean_capture_efficiency=0.0,
                     mean_storage_integrity=0.0,
                     minimum_capture_efficiency=0.0,
-                    minimum_storage_integrity=0.0
+                    minimum_storage_integrity=0.0,
+                    total_captured_tonnes = 0,
+                    total_stored_tonnes = 0,
+                    date_time = "",
                 )
             )
 
@@ -88,7 +90,10 @@ class EsgReportService(service_pb2_grpc.EsgReportServiceServicer):
             mean_capture_efficiency=stats_dict["mean_capture_efficiency"],
             mean_storage_integrity=stats_dict["mean_storage_integrity"],
             minimum_capture_efficiency=stats_dict["minimum_capture_efficiency"],
-            minimum_storage_integrity=stats_dict["minimum_storage_integrity"]
+            minimum_storage_integrity=stats_dict["minimum_storage_integrity"],
+            total_captured_tonnes = stats_dict["total_captured_tonnes"],
+            total_stored_tonnes = stats_dict["total_stored_tonnes"],
+            date_time = stats_dict["date_time"],
         )
 
         return service_pb2.GenerateEsgReportResponse(

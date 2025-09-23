@@ -58,7 +58,7 @@ csv_path = None
 
 def use_csv():
     global csv_path, data
-    csv_path = fr".\csv_dataset"
+    csv_path = fr".\csv_dataset.csv"
     if os.path.exists(csv_path):
        data = pd.read_csv(csv_path)
     else:
@@ -187,8 +187,9 @@ async def generate_esg_report(
                         annual: bool = True
                       ):
     print("Generating esg report...")
-    use_csv()
+
     global data, file_path
+    use_csv()
     stats_data = {}
     if annual or (not start_date and not end_date):
         stats_data =  annual_stats(data, facility_name) #Return this, if the annual flag is on
@@ -197,7 +198,7 @@ async def generate_esg_report(
 
     esg_report = await get_esg_report(stats_data)
     return {
-        "esg_report": esg_report["response"]["content"],
+        "esg_report": esg_report,
         "stats_data": stats_data
     }
     

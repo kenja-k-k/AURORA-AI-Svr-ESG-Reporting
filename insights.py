@@ -4,6 +4,7 @@
 import pandas as pd               # Tool for handling tabular data (spreadsheets, CSVs)
 from typing import Literal        # used in type hints to restrict a variable or return value to a fixed set of choices
 import numpy as np                # Tool for working with numbers
+from datetime import datetime
 
 # -------------------------------------------------------------------------------------
 # FUNCTION 1: Get/list facility names
@@ -85,7 +86,8 @@ def annual_stats(data: pd.DataFrame, facility_name: str, fallback: bool = True) 
     # back to current year if previous year has no data
     if fallback and filtered.empty:
         filtered = data[data["year"] == current_year]
-
+    timeNow = datetime.now()
+    formattedTime = timeNow.strftime("%Y-%m-%d %H:%M:%S")
     stats = {                                             # STEP 5: Calculate ESG metrics
         "facility_name": facility_name,
         "total_annual_emissions": filtered['co2_emitted_tonnes'].sum(),
@@ -93,7 +95,10 @@ def annual_stats(data: pd.DataFrame, facility_name: str, fallback: bool = True) 
         "mean_capture_efficiency": filtered['capture_efficiency_percent'].mean(),
         "mean_storage_integrity": filtered['storage_integrity_percent'].mean(),
         "minimum_capture_efficiency": filtered['capture_efficiency_percent'].min(),
-        "minimum_storage_integrity": filtered['storage_integrity_percent'].min()
+        "minimum_storage_integrity": filtered['storage_integrity_percent'].min(),
+        "total_captured_tonnes": filtered['co2_captured_tonnes'].sum(),
+        "total_stored_tonnes": filtered['co2_stored_tonnes'].sum(),
+        "date_time": formattedTime,
     }
 
     return stats                                          # STEP 6: Output = ESG summary dictionary

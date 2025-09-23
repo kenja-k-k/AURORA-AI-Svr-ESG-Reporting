@@ -23,6 +23,9 @@ message StatsData {
   double mean_storage_integrity = 5;
   double minimum_capture_efficiency = 6;
   double minimum_storage_integrity = 7;
+  double total_captured_tonnes = 8;
+  double total_stored_tonnes = 9;
+  string date_time = 10;
 }
 message GenerateEsgReportResponse {
   string esg_report = 1;
@@ -32,6 +35,5 @@ message GenerateEsgReportResponse {
 
 service EsgReportService {
   rpc UploadCSV(UploadCSVRequest) returns (UploadCSVResponse);
-
   rpc GenerateEsgReport(GenerateEsgReportRequest) returns (GenerateEsgReportResponse);
 }

@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14protos/service.proto\x12\x0c\x65sgReporting\"(\n\x10UploadCSVRequest\x12\x14\n\x0c\x66ile_content\x18\x01 \x01(\x0c\"4\n\x11UploadCSVResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t\"1\n\x18GenerateEsgReportRequest\x12\x15\n\rfacility_name\x18\x01 \x01(\t\"\xe9\x01\n\tStatsData\x12\x15\n\rfacility_name\x18\x01 \x01(\t\x12\x1e\n\x16total_annual_emissions\x18\x02 \x01(\x01\x12\x1d\n\x15mean_annual_emissions\x18\x03 \x01(\x01\x12\x1f\n\x17mean_capture_efficiency\x18\x04 \x01(\x01\x12\x1e\n\x16mean_storage_integrity\x18\x05 \x01(\x01\x12\"\n\x1aminimum_capture_efficiency\x18\x06 \x01(\x01\x12!\n\x19minimum_storage_integrity\x18\x07 \x01(\x01\"\\\n\x19GenerateEsgReportResponse\x12\x12\n\nesg_report\x18\x01 \x01(\t\x12+\n\nstats_data\x18\x02 \x01(\x0b\x32\x17.esgReporting.StatsData2\xc6\x01\n\x10\x45sgReportService\x12L\n\tUploadCSV\x12\x1e.esgReporting.UploadCSVRequest\x1a\x1f.esgReporting.UploadCSVResponse\x12\x64\n\x11GenerateEsgReport\x12&.esgReporting.GenerateEsgReportRequest\x1a\'.esgReporting.GenerateEsgReportResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14protos/service.proto\x12\x0c\x65sgReporting\"(\n\x10UploadCSVRequest\x12\x14\n\x0c\x66ile_content\x18\x01 \x01(\x0c\"4\n\x11UploadCSVResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t\"1\n\x18GenerateEsgReportRequest\x12\x15\n\rfacility_name\x18\x01 \x01(\t\"\xb8\x02\n\tStatsData\x12\x15\n\rfacility_name\x18\x01 \x01(\t\x12\x1e\n\x16total_annual_emissions\x18\x02 \x01(\x01\x12\x1d\n\x15mean_annual_emissions\x18\x03 \x01(\x01\x12\x1f\n\x17mean_capture_efficiency\x18\x04 \x01(\x01\x12\x1e\n\x16mean_storage_integrity\x18\x05 \x01(\x01\x12\"\n\x1aminimum_capture_efficiency\x18\x06 \x01(\x01\x12!\n\x19minimum_storage_integrity\x18\x07 \x01(\x01\x12\x1d\n\x15total_captured_tonnes\x18\x08 \x01(\x01\x12\x1b\n\x13total_stored_tonnes\x18\t \x01(\x01\x12\x11\n\tdate_time\x18\n \x01(\t\"\\\n\x19GenerateEsgReportResponse\x12\x12\n\nesg_report\x18\x01 \x01(\t\x12+\n\nstats_data\x18\x02 \x01(\x0b\x32\x17.esgReporting.StatsData2\xc6\x01\n\x10\x45sgReportService\x12L\n\tUploadCSV\x12\x1e.esgReporting.UploadCSVRequest\x1a\x1f.esgReporting.UploadCSVResponse\x12\x64\n\x11GenerateEsgReport\x12&.esgReporting.GenerateEsgReportRequest\x1a\'.esgReporting.GenerateEsgReportResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -38,9 +38,9 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GENERATEESGREPORTREQUEST']._serialized_start=134
   _globals['_GENERATEESGREPORTREQUEST']._serialized_end=183
   _globals['_STATSDATA']._serialized_start=186
-  _globals['_STATSDATA']._serialized_end=419
-  _globals['_GENERATEESGREPORTRESPONSE']._serialized_start=421
-  _globals['_GENERATEESGREPORTRESPONSE']._serialized_end=513
-  _globals['_ESGREPORTSERVICE']._serialized_start=516
-  _globals['_ESGREPORTSERVICE']._serialized_end=714
+  _globals['_STATSDATA']._serialized_end=498
+  _globals['_GENERATEESGREPORTRESPONSE']._serialized_start=500
+  _globals['_GENERATEESGREPORTRESPONSE']._serialized_end=592
+  _globals['_ESGREPORTSERVICE']._serialized_start=595
+  _globals['_ESGREPORTSERVICE']._serialized_end=793
 # @@protoc_insertion_point(module_scope)

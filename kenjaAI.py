@@ -16,7 +16,10 @@ async def get_esg_report(payload:dict):
         "Authorization": f"Bearer {KENJA_AI_SECRET}",
         "Content-Type": "application/json",
     }
-    ai_prompt = f"""Create a professional ESG (Environmental, Social, Governance) report for a Carbon Capture and Storage (CCS) facility."
+    ai_prompt = f"""Create a professional ESG (Environmental, Social, Governance) report for a Carbon Capture and Storage (CCS) facility.
+                 Generate a complete ESG (Environmental, Social, Governance) report in Markdown style. 
+
+        Now generate the ESG report based on the following data: 
                  The facility has the following operational output data:
                  Facility name: {payload['facility_name']},
                  Total CO₂ emissions: {payload['total_annual_emissions']} tons,
@@ -34,6 +37,7 @@ async def get_esg_report(payload:dict):
                 Recommendations & Improvement Measures: Suggest operational improvements, emissions reduction strategies, and ESG best practices to enhance performance.
                 Conclusion: Summarize the ESG performance and potential next steps for the facility.
                 The report should be professional, data-driven, and actionable, with comparisons to accepted standards."""
+
 
     request_body = {
          "content": ai_prompt,
