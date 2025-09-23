@@ -33,7 +33,7 @@ services:
 
   snet-daemon:
     build:
-      context: ./snet-daemon/snet-daemon
+      context: ./snet-daemon
       dockerfile: docker/Dockerfile
     image: snet-daemon:v6.1.0
     container_name: snet-daemon-esg
